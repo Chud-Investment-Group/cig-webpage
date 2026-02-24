@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 // Password hash generated with SHA-256 + salt
@@ -19,26 +19,6 @@ async function hashPassword(password, salt) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-
-const INITIAL_MARKETS = [
-  {
-    id: 10,
-    title: "Most common MIG destination: GS, MS, or JPM?",
-    category: "placement",
-    description: "Which bulge bracket will have the most MIG interns in summer 2025?",
-    yesPrice: 0.40,
-    volume: 1230,
-    endDate: "2025-06-15",
-    status: "open",
-    createdAt: "2024-12-18",
-    isMultiple: true,
-    options: [
-      { name: "Goldman Sachs", price: 0.40 },
-      { name: "Morgan Stanley", price: 0.35 },
-      { name: "JPMorgan", price: 0.25 }
-    ]
-  }
-];
 
 const DEFAULT_NEW_MARKET = {
   title: '',
@@ -61,26 +41,35 @@ export default function Admin() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const [markets, setMarkets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [editingMarket, setEditingMarket] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [resolveModal, setResolveModal] = useState(null);
 
   const [newMarket, setNewMarket] = useState(DEFAULT_NEW_MARKET);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('cig-markets');
-    if (stored) {
-      setMarkets(JSON.parse(stored));
-    } else {
-      setMarkets(INITIAL_MARKETS);
-      localStorage.setItem('cig-markets', JSON.stringify(INITIAL_MARKETS));
+  const fetchMarkets = useCallback(async () => {
+    try {
+      const res = await fetch('/api/markets');
+      const data = await res.json();
+      if (data.markets) {
+        setMarkets(data.markets);
+      }
+    } catch (err) {
+      console.error('Error fetching markets:', err);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
+  useEffect(() => {
     const session = sessionStorage.getItem('cig-admin-session');
     if (session === 'authenticated') {
       setIsLoggedIn(true);
     }
-  }, []);
+    fetchMarkets();
+  }, [fetchMarkets]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -109,16 +98,31 @@ export default function Admin() {
     sessionStorage.removeItem('cig-admin-session');
   };
 
-  const saveMarkets = (updatedMarkets) => {
-    setMarkets(updatedMarkets);
-    localStorage.setItem('cig-markets', JSON.stringify(updatedMarkets));
+  const saveMarkets = async (updatedMarkets) => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/markets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markets: updatedMarkets }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setMarkets(updatedMarkets);
+      return true;
+    } catch (err) {
+      console.error('Error saving markets:', err);
+      alert('Failed to save changes. Please try again.');
+      return false;
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getOptionsTotal = (options) => {
     return options.reduce((sum, opt) => sum + (parseFloat(opt.price) || 0), 0);
   };
 
-  const handleCreateMarket = (e) => {
+  const handleCreateMarket = async (e) => {
     e.preventDefault();
 
     if (newMarket.isMultiple) {
@@ -155,12 +159,14 @@ export default function Admin() {
     };
 
     const updatedMarkets = [...markets, market];
-    saveMarkets(updatedMarkets);
-    setNewMarket(DEFAULT_NEW_MARKET);
-    setShowCreateForm(false);
+    const success = await saveMarkets(updatedMarkets);
+    if (success) {
+      setNewMarket(DEFAULT_NEW_MARKET);
+      setShowCreateForm(false);
+    }
   };
 
-  const handleUpdateMarket = (e) => {
+  const handleUpdateMarket = async (e) => {
     e.preventDefault();
 
     if (editingMarket.isMultiple) {
@@ -192,11 +198,14 @@ export default function Admin() {
       }
       return m;
     });
-    saveMarkets(updatedMarkets);
-    setEditingMarket(null);
+
+    const success = await saveMarkets(updatedMarkets);
+    if (success) {
+      setEditingMarket(null);
+    }
   };
 
-  const handleResolveMarket = (marketId, resolution) => {
+  const handleResolveMarket = async (marketId, resolution) => {
     const updatedMarkets = markets.map(m => {
       if (m.id === marketId) {
         if (m.isMultiple) {
@@ -221,18 +230,21 @@ export default function Admin() {
       }
       return m;
     });
-    saveMarkets(updatedMarkets);
-    setResolveModal(null);
-  };
 
-  const handleDeleteMarket = (marketId) => {
-    if (confirm('Are you sure you want to delete this market?')) {
-      const updatedMarkets = markets.filter(m => m.id !== marketId);
-      saveMarkets(updatedMarkets);
+    const success = await saveMarkets(updatedMarkets);
+    if (success) {
+      setResolveModal(null);
     }
   };
 
-  const handleReopenMarket = (marketId) => {
+  const handleDeleteMarket = async (marketId) => {
+    if (confirm('Are you sure you want to delete this market?')) {
+      const updatedMarkets = markets.filter(m => m.id !== marketId);
+      await saveMarkets(updatedMarkets);
+    }
+  };
+
+  const handleReopenMarket = async (marketId) => {
     const updatedMarkets = markets.map(m => {
       if (m.id === marketId) {
         if (m.isMultiple) {
@@ -250,7 +262,7 @@ export default function Admin() {
       }
       return m;
     });
-    saveMarkets(updatedMarkets);
+    await saveMarkets(updatedMarkets);
   };
 
   const addOption = (isEditing = false) => {
@@ -400,11 +412,12 @@ export default function Admin() {
           <div className="admin-header">
             <div>
               <h1>Admin Panel</h1>
-              <p>Manage prediction markets</p>
+              <p>Manage prediction markets {saving && <span style={{ color: 'var(--secondary)' }}>(Saving...)</span>}</p>
             </div>
             <button
               className="btn btn-primary"
               onClick={() => setShowCreateForm(true)}
+              disabled={saving}
             >
               + Create Market
             </button>
@@ -431,7 +444,11 @@ export default function Admin() {
 
           <div className="admin-markets-list">
             <h2>All Markets</h2>
-            {markets.length === 0 ? (
+            {loading ? (
+              <div className="admin-empty">
+                <p>Loading markets...</p>
+              </div>
+            ) : markets.length === 0 ? (
               <div className="admin-empty">
                 <p>No markets yet.</p>
                 <button className="btn btn-primary" onClick={() => setShowCreateForm(true)}>
@@ -473,6 +490,7 @@ export default function Admin() {
                           <button
                             className="action-btn edit"
                             onClick={() => setEditingMarket({ ...market, options: market.options ? [...market.options] : undefined })}
+                            disabled={saving}
                           >
                             Edit
                           </button>
@@ -481,6 +499,7 @@ export default function Admin() {
                               <button
                                 className="action-btn resolve-yes"
                                 onClick={() => setResolveModal(market)}
+                                disabled={saving}
                               >
                                 Resolve
                               </button>
@@ -489,12 +508,14 @@ export default function Admin() {
                                 <button
                                   className="action-btn resolve-yes"
                                   onClick={() => handleResolveMarket(market.id, 'YES')}
+                                  disabled={saving}
                                 >
                                   Yes
                                 </button>
                                 <button
                                   className="action-btn resolve-no"
                                   onClick={() => handleResolveMarket(market.id, 'NO')}
+                                  disabled={saving}
                                 >
                                   No
                                 </button>
@@ -505,6 +526,7 @@ export default function Admin() {
                             <button
                               className="action-btn reopen"
                               onClick={() => handleReopenMarket(market.id)}
+                              disabled={saving}
                             >
                               Reopen
                             </button>
@@ -512,6 +534,7 @@ export default function Admin() {
                           <button
                             className="action-btn delete"
                             onClick={() => handleDeleteMarket(market.id)}
+                            disabled={saving}
                           >
                             Delete
                           </button>
@@ -653,8 +676,8 @@ export default function Admin() {
                 />
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Create Market
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={saving}>
+                {saving ? 'Creating...' : 'Create Market'}
               </button>
             </form>
           </div>
@@ -779,8 +802,8 @@ export default function Admin() {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Save Changes
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </form>
           </div>
@@ -802,6 +825,7 @@ export default function Admin() {
                   key={i}
                   className="resolve-option-btn"
                   onClick={() => handleResolveMarket(resolveModal.id, opt.name)}
+                  disabled={saving}
                 >
                   {opt.name}
                   <span className="resolve-option-price">{(opt.price * 100).toFixed(0)}%</span>

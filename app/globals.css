@@ -817,6 +817,30 @@ body {
   color: var(--gray);
 }
 
+.loading-state {
+  text-align: center;
+  padding: 6rem 2rem;
+  color: var(--gray);
+}
+
+.error-banner {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.error-banner button {
+  background: none;
+  border: none;
+  color: #721c24;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;

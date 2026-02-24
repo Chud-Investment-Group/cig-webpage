@@ -1,57 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-
-const INITIAL_MARKETS = [
-  {
-    id: 3,
-    title: "Number of MIG members at Citadel internships ≥ 3?",
-    category: "placement",
-    description: "Counts Citadel Securities and Citadel LLC. Summer 2025 internships only.",
-    yesPrice: 0.38,
-    volume: 3200,
-    endDate: "2025-07-01",
-    status: "open",
-    createdAt: "2024-11-28"
-  },
-  {
-    id: 10,
-    title: "Most common MIG destination: GS, MS, or JPM?",
-    category: "placement",
-    description: "Which bulge bracket will have the most MIG interns in summer 2025?",
-    yesPrice: 0.40,
-    volume: 1230,
-    endDate: "2025-06-15",
-    status: "open",
-    createdAt: "2024-12-18",
-    isMultiple: true,
-    options: [
-      { name: "Goldman Sachs", price: 0.40 },
-      { name: "Morgan Stanley", price: 0.35 },
-      { name: "JPMorgan", price: 0.25 }
-    ]
-  }
-];
 
 export default function Markets() {
   const [markets, setMarkets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('open');
   const [sortBy, setSortBy] = useState('volume');
   const [selectedMarket, setSelectedMarket] = useState(null);
   const [betAmount, setBetAmount] = useState('');
   const [betSide, setBetSide] = useState('yes');
+  const [placing, setPlacing] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('cig-markets');
-    if (stored) {
-      setMarkets(JSON.parse(stored));
-    } else {
-      setMarkets(INITIAL_MARKETS);
-      localStorage.setItem('cig-markets', JSON.stringify(INITIAL_MARKETS));
+  const fetchMarkets = useCallback(async () => {
+    try {
+      const res = await fetch('/api/markets');
+      const data = await res.json();
+      if (data.markets) {
+        setMarkets(data.markets);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching markets:', err);
+      setError('Failed to load markets');
+    } finally {
+      setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchMarkets();
+    // Poll for updates every 10 seconds
+    const interval = setInterval(fetchMarkets, 10000);
+    return () => clearInterval(interval);
+  }, [fetchMarkets]);
+
+  const saveMarkets = async (updatedMarkets) => {
+    try {
+      const res = await fetch('/api/markets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markets: updatedMarkets }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      return true;
+    } catch (err) {
+      console.error('Error saving markets:', err);
+      return false;
+    }
+  };
 
   const filteredMarkets = markets
     .filter(m => filter === 'all' || m.category === filter)
@@ -63,10 +63,11 @@ export default function Markets() {
       return 0;
     });
 
-  const handleBet = (e) => {
+  const handleBet = async (e) => {
     e.preventDefault();
     if (!betAmount || parseFloat(betAmount) <= 0) return;
 
+    setPlacing(true);
     const amount = parseFloat(betAmount);
     const updatedMarkets = markets.map(m => {
       if (m.id === selectedMarket.id) {
@@ -82,11 +83,16 @@ export default function Markets() {
       return m;
     });
 
-    setMarkets(updatedMarkets);
-    localStorage.setItem('cig-markets', JSON.stringify(updatedMarkets));
-    alert(`Bet placed! $${amount} on ${betSide.toUpperCase()} for "${selectedMarket.title}"`);
-    setSelectedMarket(null);
-    setBetAmount('');
+    const success = await saveMarkets(updatedMarkets);
+    if (success) {
+      setMarkets(updatedMarkets);
+      alert(`Bet placed! $${amount} on ${betSide.toUpperCase()} for "${selectedMarket.title}"`);
+      setSelectedMarket(null);
+      setBetAmount('');
+    } else {
+      alert('Failed to place bet. Please try again.');
+    }
+    setPlacing(false);
   };
 
   const getCategoryLabel = (cat) => {
@@ -98,6 +104,34 @@ export default function Markets() {
     };
     return labels[cat] || cat;
   };
+
+  if (loading) {
+    return (
+      <>
+        <nav className="nav">
+          <div className="container nav-content">
+            <Link href="/" className="logo">
+              <span>C</span>HUD <span>I</span>NVESTMENT <span>G</span>ROUP
+            </Link>
+            <ul className="nav-links">
+              <li><Link href="/markets" className="active">Markets</Link></li>
+              <li><Link href="/#how-it-works">How It Works</Link></li>
+              <li><Link href="/#about">About</Link></li>
+              <li><Link href="/#contact">Contact</Link></li>
+              <li><Link href="/admin" className="nav-admin">Admin</Link></li>
+            </ul>
+          </div>
+        </nav>
+        <main className="markets-page">
+          <div className="container">
+            <div className="loading-state">
+              <p>Loading markets...</p>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -122,6 +156,12 @@ export default function Markets() {
             <h1>Prediction Markets</h1>
             <p>Trade on MIG member career outcomes</p>
           </div>
+
+          {error && (
+            <div className="error-banner">
+              {error} - <button onClick={fetchMarkets}>Retry</button>
+            </div>
+          )}
 
           <div className="markets-filters">
             <div className="filter-group">
@@ -276,6 +316,7 @@ export default function Markets() {
                   min="1"
                   step="1"
                   required
+                  disabled={placing}
                 />
               </div>
 
@@ -290,8 +331,8 @@ export default function Markets() {
                 </div>
               )}
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Confirm Bet
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={placing}>
+                {placing ? 'Placing...' : 'Confirm Bet'}
               </button>
             </form>
           </div>
@@ -301,7 +342,7 @@ export default function Markets() {
       <footer className="footer" style={{ marginTop: '4rem' }}>
         <div className="container">
           <div className="footer-bottom">
-            <p>&copy; 2024 Chud Investment Group. All rights reserved. Go Blue! 〽️</p>
+            <p>&copy; 2024 Chud Investment Group. All rights reserved. Go Blue!</p>
           </div>
         </div>
       </footer>
