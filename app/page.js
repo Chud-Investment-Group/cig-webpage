@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -29,10 +30,11 @@ export default function Home() {
             <span>C</span>HUD <span>I</span>NVESTMENT <span>G</span>ROUP
           </a>
           <ul className="nav-links">
-            <li><a href="#services">Services</a></li>
-            <li><a href="#products">Products</a></li>
+            <li><Link href="/markets">Markets</Link></li>
+            <li><a href="#how-it-works">How It Works</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
+            <li><Link href="/admin" className="nav-admin">Admin</Link></li>
           </ul>
         </div>
       </nav>
@@ -42,36 +44,36 @@ export default function Home() {
         <div className="container hero-content">
           <div className="hero-text">
             <h1>
-              Unlocking <span>Liquidity</span> for Michigan Students
+              Predict the <span>Future</span> of MIG Members
             </h1>
             <p>
-              We create innovative derivative products that provide UMich students
-              with access to capital when they need it most. Turn your future potential
-              into present opportunity.
+              The premier prediction market for University of Michigan students.
+              Bet on summer intern salaries, company placements, and career outcomes
+              of Michigan Investment Group members.
             </p>
             <div>
-              <a href="#contact" className="btn btn-primary">Get Started</a>
-              <a href="#products" className="btn btn-secondary">Our Products</a>
+              <Link href="/markets" className="btn btn-primary">View Markets</Link>
+              <a href="#how-it-works" className="btn btn-secondary">Learn More</a>
             </div>
           </div>
           <div className="hero-visual">
             <div className="hero-graphic">
               <div className="hero-stats">
                 <div className="stat">
-                  <div className="stat-value">$2M+</div>
-                  <div className="stat-label">Liquidity Provided</div>
+                  <div className="stat-value">$300</div>
+                  <div className="stat-label">Total Volume</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-value">500+</div>
-                  <div className="stat-label">Students Served</div>
+                  <div className="stat-value">10</div>
+                  <div className="stat-label">Active Traders</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-value">15+</div>
-                  <div className="stat-label">Asset Classes</div>
+                  <div className="stat-value">2</div>
+                  <div className="stat-label">Open Markets</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-value">98%</div>
-                  <div className="stat-label">Satisfaction Rate</div>
+                  <div className="stat-value">0</div>
+                  <div className="stat-label">Resolved</div>
                 </div>
               </div>
             </div>
@@ -79,103 +81,106 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="services" id="services">
+      {/* How It Works Section */}
+      <section className="services" id="how-it-works">
         <div className="container">
           <div className="section-header">
-            <h2>Our Services</h2>
+            <h2>How It Works</h2>
             <p>
-              We specialize in creating customized financial solutions tailored
-              to the unique needs of university students.
+              Trade on the outcomes of MIG members&apos; careers and internships.
+              Put your insider knowledge to work.
             </p>
           </div>
           <div className="services-grid">
             <div className="service-card">
-              <div className="service-icon">📊</div>
-              <h3>Derivative Structuring</h3>
+              <div className="service-icon">🎯</div>
+              <h3>Choose a Market</h3>
               <p>
-                Custom derivative products designed around your specific assets
-                and liquidity needs, from future earnings to tangible assets.
+                Browse open markets on intern salaries, company placements,
+                return offer rates, and more. Each market has clear resolution criteria.
               </p>
             </div>
             <div className="service-card">
-              <div className="service-icon">💰</div>
-              <h3>Liquidity Solutions</h3>
+              <div className="service-icon">💵</div>
+              <h3>Place Your Bets</h3>
               <p>
-                Access capital without selling your assets outright. Our structures
-                let you maintain upside while getting cash today.
+                Buy shares in outcomes you believe in. Prices reflect the crowd&apos;s
+                probability estimate. Buy low, sell high.
               </p>
             </div>
             <div className="service-card">
-              <div className="service-icon">🎓</div>
-              <h3>Student-First Approach</h3>
+              <div className="service-icon">🏆</div>
+              <h3>Win Big</h3>
               <p>
-                Products designed specifically for UMich students, with terms
-                that align with academic schedules and career trajectories.
+                When markets resolve, correct predictions pay out. The better
+                your information, the more you can earn.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="products" id="products">
+      {/* Featured Markets Section */}
+      <section className="products" id="markets-preview">
         <div className="container">
           <div className="section-header">
-            <h2>Derivative Products</h2>
+            <h2>Featured Markets</h2>
             <p>
-              Innovative financial instruments backed by various underlying assets
+              Hot markets with the most action right now
             </p>
           </div>
           <div className="products-grid">
             <div className="product-card">
-              <h3>Income Share Derivatives</h3>
+              <h3>Intern Salary Markets</h3>
               <p>
-                Structured products based on projected future earnings, allowing
-                students to monetize their career potential today.
+                Predict the total compensation packages for MIG members&apos;
+                summer internships. Will they break $15K/month?
               </p>
               <ul className="product-features">
-                <li>Flexible repayment tied to income</li>
-                <li>No fixed monthly payments during school</li>
-                <li>Career-aligned terms</li>
+                <li>Over/under on monthly salary</li>
+                <li>Signing bonus predictions</li>
+                <li>Total comp rankings</li>
               </ul>
             </div>
             <div className="product-card">
-              <h3>Asset-Backed Notes</h3>
+              <h3>Company Placement</h3>
               <p>
-                Liquidity against tangible assets including vehicles, equipment,
-                and other valuable property.
+                Which firms will MIG members land at? Bet on specific
+                companies or categories.
               </p>
               <ul className="product-features">
-                <li>Retain asset ownership</li>
-                <li>Competitive rates</li>
-                <li>Quick approval process</li>
+                <li>Bulge bracket vs boutique</li>
+                <li>Tech vs finance placement</li>
+                <li>Specific firm predictions</li>
               </ul>
             </div>
             <div className="product-card">
-              <h3>Tuition Forward Contracts</h3>
+              <h3>Return Offer Rates</h3>
               <p>
-                Lock in current tuition rates or hedge against increases with
-                our forward contract structures.
+                Will they get the return offer? Predict conversion rates
+                for individual members or cohorts.
               </p>
               <ul className="product-features">
-                <li>Protection against tuition hikes</li>
-                <li>Predictable education costs</li>
-                <li>Transferable contracts</li>
+                <li>Individual return offers</li>
+                <li>Cohort conversion rates</li>
+                <li>Full-time placement odds</li>
               </ul>
             </div>
             <div className="product-card">
-              <h3>Scholarship Monetization</h3>
+              <h3>Career Outcomes</h3>
               <p>
-                Convert future scholarship disbursements into immediate capital
-                for current needs.
+                Longer-term bets on career trajectories, promotions,
+                and industry switches.
               </p>
               <ul className="product-features">
-                <li>Immediate access to funds</li>
-                <li>Structured payback options</li>
-                <li>No credit check required</li>
+                <li>First-year analyst rankings</li>
+                <li>MBA admission odds</li>
+                <li>5-year career predictions</li>
               </ul>
             </div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <Link href="/markets" className="btn btn-primary">View All Markets</Link>
           </div>
         </div>
       </section>
@@ -186,34 +191,33 @@ export default function Home() {
           <div className="about-text">
             <h2>About Chud Investment Group</h2>
             <p>
-              Founded by University of Michigan alumni, Chud Investment Group
-              understands the unique financial challenges facing today&apos;s students.
-              We&apos;ve built a platform that bridges the gap between future potential
-              and present needs.
+              Founded by University of Michigan students in 2024, Chud Investment Group
+              brings prediction markets to the world of campus recruiting. We believe
+              that collective intelligence can forecast career outcomes better than
+              any individual.
             </p>
             <p>
-              Our team combines expertise in quantitative finance, risk management,
-              and student lending to create products that work for students, not
-              against them. We&apos;re committed to transparent terms, fair pricing,
-              and student success.
+              Our platform lets MIG members and friends put their social knowledge
+              to work. Who&apos;s going to crush their internship? Who&apos;s getting that
+              Jane Street offer? Now you can bet on it.
             </p>
           </div>
           <div className="about-stats">
             <div className="about-stat">
-              <div className="about-stat-value">2019</div>
+              <div className="about-stat-value">2026</div>
               <div className="about-stat-label">Founded</div>
             </div>
             <div className="about-stat">
-              <div className="about-stat-value">$50M</div>
-              <div className="about-stat-label">AUM</div>
+              <div className="about-stat-value">$300</div>
+              <div className="about-stat-label">Volume Traded</div>
             </div>
             <div className="about-stat">
-              <div className="about-stat-value">12</div>
-              <div className="about-stat-label">Team Members</div>
+              <div className="about-stat-value">10</div>
+              <div className="about-stat-label">Active Users</div>
             </div>
             <div className="about-stat">
-              <div className="about-stat-value">A+</div>
-              <div className="about-stat-label">BBB Rating</div>
+              <div className="about-stat-value">Beta</div>
+              <div className="about-stat-label">Status</div>
             </div>
           </div>
         </div>
@@ -223,16 +227,14 @@ export default function Home() {
       <section className="contact" id="contact">
         <div className="container contact-content">
           <div className="contact-info">
-            <h2>Get In Touch</h2>
+            <h2>Get Access</h2>
             <p>
-              Ready to explore your liquidity options? Contact our team to discuss
-              how we can help you access the capital you need.
+              We&apos;re currently in private beta with MIG members and friends.
+              Request access to start trading.
             </p>
             <ul className="contact-details">
-              <li>📍 Ann Arbor, MI 48104</li>
-              <li>📧 info@chudinvestment.com</li>
-              <li>📞 (734) 555-0123</li>
-              <li>🕐 Mon-Fri: 9:00 AM - 6:00 PM EST</li>
+              <li>📍 Ann Arbor, MI</li>
+              <li>📧 kzheng@chudinvestmentgroup.com</li>
             </ul>
           </div>
           <form className="contact-form" onSubmit={handleSubmit}>
@@ -261,7 +263,7 @@ export default function Home() {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="interest">Product Interest</label>
+              <label htmlFor="interest">How do you know MIG?</label>
               <select
                 id="interest"
                 name="interest"
@@ -269,26 +271,26 @@ export default function Home() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Select a product</option>
-                <option value="income-share">Income Share Derivatives</option>
-                <option value="asset-backed">Asset-Backed Notes</option>
-                <option value="tuition-forward">Tuition Forward Contracts</option>
-                <option value="scholarship">Scholarship Monetization</option>
-                <option value="other">Other / General Inquiry</option>
+                <option value="">Select one</option>
+                <option value="member">Current MIG Member</option>
+                <option value="alumni">MIG Alumni</option>
+                <option value="friend">Friend of MIG</option>
+                <option value="ross">Ross Student</option>
+                <option value="other">Other</option>
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="message">Message</label>
+              <label htmlFor="message">Why do you want access?</label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Tell us about your liquidity needs..."
+                placeholder="Tell us why you'd be a good trader..."
               />
             </div>
             <button type="submit" className="btn btn-primary">
-              Submit Inquiry
+              Request Access
             </button>
           </form>
         </div>
@@ -303,26 +305,26 @@ export default function Home() {
                 <span>C</span>HUD <span>I</span>NVESTMENT <span>G</span>ROUP
               </div>
               <p>
-                Providing innovative liquidity solutions for University of Michigan
-                students since 2019.
+                The prediction market for MIG career outcomes.
+                Founded 2024 at the University of Michigan.
               </p>
             </div>
             <div className="footer-links">
-              <h4>Products</h4>
+              <h4>Markets</h4>
               <ul>
-                <li><a href="#products">Income Share</a></li>
-                <li><a href="#products">Asset-Backed</a></li>
-                <li><a href="#products">Tuition Forward</a></li>
-                <li><a href="#products">Scholarship</a></li>
+                <li><Link href="/markets">All Markets</Link></li>
+                <li><Link href="/markets?category=salary">Salary</Link></li>
+                <li><Link href="/markets?category=placement">Placement</Link></li>
+                <li><Link href="/markets?category=outcomes">Outcomes</Link></li>
               </ul>
             </div>
             <div className="footer-links">
               <h4>Company</h4>
               <ul>
                 <li><a href="#about">About Us</a></li>
-                <li><a href="#services">Services</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#contact">Contact</a></li>
-                <li><a href="#">Careers</a></li>
+                <li><Link href="/admin">Admin</Link></li>
               </ul>
             </div>
             <div className="footer-links">
@@ -330,16 +332,15 @@ export default function Home() {
               <ul>
                 <li><a href="#">Terms of Service</a></li>
                 <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Disclosures</a></li>
-                <li><a href="#">Compliance</a></li>
+                <li><a href="#">Rules</a></li>
               </ul>
             </div>
           </div>
           <div className="disclaimer">
-            <strong>Important Disclosure:</strong> Chud Investment Group products involve
-            financial risk. Past performance does not guarantee future results. All derivative
-            products are subject to terms and conditions. Not FDIC insured. Please review all
-            documentation carefully before entering into any agreement.
+            <strong>Disclaimer:</strong> This platform is for entertainment and educational
+            purposes only. All trading involves risk. This is not a licensed gambling platform.
+            Participation is limited to approved University of Michigan community members.
+            Please trade responsibly.
           </div>
           <div className="footer-bottom">
             <p>&copy; 2024 Chud Investment Group. All rights reserved. Go Blue! 〽️</p>
