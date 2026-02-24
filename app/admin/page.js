@@ -107,7 +107,8 @@ export default function Admin() {
         body: JSON.stringify({ markets: updatedMarkets }),
       });
       if (!res.ok) throw new Error('Failed to save');
-      setMarkets(updatedMarkets);
+      // Refresh from server to ensure we have the latest state
+      await fetchMarkets();
       return true;
     } catch (err) {
       console.error('Error saving markets:', err);

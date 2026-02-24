@@ -1,6 +1,9 @@
 import { Redis } from '@upstash/redis';
 import { DEFAULT_MARKETS, MARKETS_KEY } from '../../lib/markets';
 
+// Prevent Next.js from caching this route - ensures fresh data on every request
+export const dynamic = 'force-dynamic';
+
 // Initialize Redis client
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
@@ -17,11 +20,25 @@ export async function GET() {
       await redis.set(MARKETS_KEY, markets);
     }
 
-    return Response.json({ markets });
+    return Response.json(
+      { markets },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching markets:', error);
     // Fallback to defaults if Redis is not configured
-    return Response.json({ markets: DEFAULT_MARKETS, error: 'Redis not configured' });
+    return Response.json(
+      { markets: DEFAULT_MARKETS, error: 'Redis not configured' },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   }
 }
 
